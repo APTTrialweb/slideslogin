@@ -2,105 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Slides Login</title>
+  <title>APT Online Daily Test</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f9;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       margin: 0;
     }
-    .login-container {
+    .login-card {
       background: white;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      width: 350px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       text-align: center;
+      width: 350px;
     }
-    .login-container h2 {
-      margin-bottom: 30px;
-      color: #333;
+    .login-card img {
+      width: 80px;
+      margin-bottom: 15px;
     }
-    .login-container input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 5px;
+    .login-card h2 {
+      color: red;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
       border: 1px solid #ccc;
-      font-size: 16px;
+      border-radius: 8px;
     }
-    .login-container button {
-      width: 100%;
-      padding: 12px;
-      background: #007BFF;
+    button {
+      width: 95%;
+      padding: 10px;
+      margin-top: 15px;
+      background: red;
       color: white;
       border: none;
-      border-radius: 5px;
-      font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
-      margin-top: 15px;
-      transition: 0.3s;
+      font-size: 16px;
     }
-    .login-container button:hover {
-      background: #0056b3;
+    button:hover {
+      background: darkred;
     }
-    .error-msg {
-      color: red;
-      margin-top: 10px;
+    .loading {
       display: none;
+      margin-top: 15px;
+      font-size: 16px;
+      color: blue;
+    }
+    #msg {
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-
-  <div class="login-container">
-    <h2>Student Slides Login</h2>
-    <form id="loginForm">
-      <input type="text" id="studentId" placeholder="Student ID" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">Login</button>
-      <div class="error-msg" id="errorMsg">Invalid Student ID or Password</div>
-    </form>
+  <div class="login-card">
+    <img src="YOUR_APT_LOGO_URL" alt="APT Logo">
+    <h2>APT Online Daily Test</h2>
+    <input type="email" id="email" placeholder="Enter your Gmail" required>
+    <button onclick="login()">Login</button>
+    <div class="loading" id="loading">Checking... Please wait ⏳</div>
+    <div id="msg"></div>
   </div>
 
   <script>
-    const webAppURL = "https://script.google.com/macros/s/AKfycbyjzzZnpjQXgv-paQsALuw_XDRE76KOvjZZQcRdOGHP9ORqgZcra097IBlnfY003LTw/exec"; // <-- Replace with your Apps Script web app URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbzgmYmg2zBYXznAkgkbHo4R7-rZ2ScuV1F9XxG1GmPJqjoDaEpFhdMP8fVcK42yuMAK/exec"; // paste the script URL here
 
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      if (!email) { alert("Enter your Gmail ID"); return; }
 
-      const studentId = document.getElementById("studentId").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const errorMsg = document.getElementById("errorMsg");
-      errorMsg.style.display = "none";
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("msg").innerHTML = "";
 
-      try {
-        const response = await fetch(webAppURL, {
-          method: "POST",
-          body: JSON.stringify({ studentId, password }),
-          headers: { "Content-Type": "application/json" }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          // Redirect to student's Google Slides
-          window.location.href = data.link;
+      fetch(API_URL, {
+        method: "POST",
+        body: new URLSearchParams({email})
+      })
+      .then(r => r.json())
+      .then(res => {
+        document.getElementById("loading").style.display = "none";
+        if (res.status === "success") {
+          document.getElementById("msg").innerHTML =
+            `<h3 style="color:green;">Welcome ${res.name}! Redirecting...</h3>`;
+          setTimeout(() => window.location.href = res.slideLink, 1500);
         } else {
-          errorMsg.style.display = "block";
+          document.getElementById("msg").innerHTML =
+            `<h3 style="color:red;">Access Denied</h3>`;
         }
-      } catch (err) {
-        console.error(err);
-        errorMsg.textContent = "Something went wrong. Please try again.";
-        errorMsg.style.display = "block";
-      }
-    });
+      })
+      .catch(err => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("msg").innerHTML =
+          `<h3 style="color:red;">Error: ${err}</h3>`;
+      });
+    }
   </script>
-
 </body>
 </html>
